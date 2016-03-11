@@ -11,3 +11,16 @@ body {
 }
 
 a { color: #00B7FF; }
+
+.blab-container {
+  border: 1px solid black;
+  border-radius: 20px;
+  padding: 10px 10px 10px 30px;
+  margin-bottom: 10px;
+  max-width: 500px;
+  min-width: 460px;
+}
+
+.blab-container h3 {
+  margin: 0;
+}
