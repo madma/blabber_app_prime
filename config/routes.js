@@ -15,7 +15,7 @@ router.get('/users',     usersController.index);
 router.get('/users/:id', usersController.show);
 
 // blabs resource paths:
-router.get('/blabs', blabsController.index);
-
+router.get(   '/blabs',     blabsController.index);
+router.delete('/blabs/:id', blabsController.destroy);
 
 module.exports = router;

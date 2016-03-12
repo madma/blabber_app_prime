@@ -12,11 +12,23 @@ function index(req, res, next) {
   );
 }
 
+function destroy(req, res, next) {
+  Blab
+  .findByIdAndRemove(req.params.id)
+  .then(function(result) {
+    res.json(result);
+  })
+  .catch(
+    logAndPassErrors
+  );
+}
+
 function logAndPassErrors(err) {
   console.log("Error: ", err);
   next(err);
 }
 
 module.exports = {
-  index: index
+  index:   index,
+  destroy: destroy
 };
