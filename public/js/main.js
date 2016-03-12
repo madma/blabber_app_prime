@@ -1,73 +1,55 @@
 console.log('JS loaded!');
 
-// 0. Trigger the LOAD Ajax action (on page load).
+var $blabsList;
+var renderBlab = _.template(`
+  <article id="<%= _id %>" class="blab blab-container">
+    <a href="/blabs/<%= _id %>"><h3><%= name %></h3></a>
+    <span>
+      Created at <%= createdAt %>, by
+      <a href="/users/<%= creator %>"><%= creatorHandle %></a>
+    </span>
+    <!-- <br> -->
+    <!-- <button>upvote</button> VoteCount <button>downvote</button> -->
+    <button class="blab-remove" data-blab-id="<%= _id %>" >delete</button>
+  </article>
+`);
+
 $(document).ready(function() {
+  $blabsList = $("#blabs-list");
   loadBlabs();
 });
 
+function renderAndAppendComponent(blab) {
+  var blabComponent  = renderBlab(blab);
+  var $blabComponent = $(blabComponent);
+
+  $blabComponent.find(".blab-remove").on("click", function(evt) {
+    var $button = $(evt.target);
+    var id = $button.data("blab-id");
+    removeBlab(id, $blabComponent);
+  });
+
+  $blabsList.append($blabComponent);
+}
+
 function loadBlabs() {
-  // 1. Make an INDEX request.
   $.ajax({
     method: "GET",
     url:    "/blabs"
   })
 
-  // 2. (5.) Parse/log the response.
   .then(
-    logSuccess, // Success handler comes first,
-    logErrors   // optional (but RECOMMENDED!) error handler comes second.
+    logSuccess,
+    logErrors
   )
 
-  // 3. (6.) Finally, render/append the items.
-  .then(
+  .then(function(blabs) {
+    console.log("Rendering: ", blabs);
 
-    function(blabs) {
-      console.log("Rendering: ", blabs);
-
-      // A. Grab insertion point.
-      var $blabsList = $("#blabs-list");
-
-      // B. Store our template.
-      //   - 1. write the HTML outline.
-      //   - 2. write in the interpolated data.
-      var blabTemplate = `
-        <article id="<%= _id %>" class="blab blab-container">
-          <a href="/blabs/<%= _id %>"><h3><%= name %></h3></a>
-          <span>
-            Created at <%= createdAt %>, by
-            <a href="/users/<%= creator %>"><%= creatorHandle %></a>
-          </span>
-          <!-- <br> -->
-          <!-- <button>upvote</button> VoteCount <button>downvote</button> -->
-          <button class="blab-remove" data-blab-id="<%= _id %>" >delete</button>
-        </article>
-      `;
-
-      // C. Generate HTML!
-      //   - 1. compile the template into a render function.
-      //   - 2. run the object(s) through the render function.
-      var renderBlab = _.template(blabTemplate);
-
-      blabs.forEach(function(blab) {
-        var blabComponent = renderBlab(blab);
-
-        // D. Attach JS listeners to the rendered component.
-        //   - Use jQuery to wrap the HTML componenet.
-        var $blabComponent = $(blabComponent);
-
-        // -> Attaching a remove action.
-        // $blabComponent.on("click", ".blab-remove", ... );
-        $blabComponent.find(".blab-remove").on("click", function(evt) {
-          var $button = $(evt.target);
-          var id = $button.data("blab-id");
-          removeBlab(id, $blabComponent);
-        });
-
-        // E. Append the HTML to the DOM (at the insertion point)
-        $blabsList.append($blabComponent);
-      });
-    }
-  )
+    blabs.forEach(function(blab) {
+      renderAndAppendComponent(blab);
+    });
+  });
 }
 
 function removeBlab(id, $blabComponent) {
