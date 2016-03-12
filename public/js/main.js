@@ -20,6 +20,7 @@ function loadBlabs() {
 
   // 3. (6.) Finally, render/append the items.
   .then(
+
     function(blabs) {
       console.log("Rendering: ", blabs);
 
@@ -30,7 +31,7 @@ function loadBlabs() {
       //   - 1. write the HTML outline.
       //   - 2. write in the interpolated data.
       var blabTemplate = `
-        <article class="blab blab-container">
+        <article id="<%= _id %>" class="blab blab-container">
           <a href="/blabs/<%= _id %>"><h3><%= name %></h3></a>
           <span>
             Created at <%= createdAt %>, by
@@ -38,6 +39,7 @@ function loadBlabs() {
           </span>
           <!-- <br> -->
           <!-- <button>upvote</button> VoteCount <button>downvote</button> -->
+          <button class="blab-remove" data-blab-id="<%= _id %>" >delete</button>
         </article>
       `;
 
@@ -47,19 +49,41 @@ function loadBlabs() {
       var renderBlab = _.template(blabTemplate);
 
       blabs.forEach(function(blab) {
-        var blabHtml = renderBlab(blab);
+        var blabComponent = renderBlab(blab);
 
-        // D. ...
+        // D. Attach JS listeners to the rendered component.
+        //   - Use jQuery to wrap the HTML componenet.
+        var $blabComponent = $(blabComponent);
+
+        // -> Attaching a remove action.
+        // $blabComponent.on("click", ".blab-remove", ... );
+        $blabComponent.find(".blab-remove").on("click", function(evt) {
+          var $button = $(evt.target);
+          var id = $button.data("blab-id");
+          removeBlab(id, $blabComponent);
+        });
 
         // E. Append the HTML to the DOM (at the insertion point)
-        $blabsList.append(blabHtml);
+        $blabsList.append($blabComponent);
       });
-
-
-
-
     }
   )
+}
+
+function removeBlab(id, $blabComponent) {
+  $.ajax({
+    method: "DELETE",
+    url:    "/blabs/" + id
+  })
+
+  .then(
+    logSuccess,
+    logErrors
+  )
+
+  .then(function(data) {
+    $blabComponent.remove();
+  });
 }
 
 function logSuccess(data) {
