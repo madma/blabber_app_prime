@@ -26,28 +26,28 @@ User.remove({})
 
 .then(function() {
   console.log("Removing blabs…");
-  Blab.remove({});
-})
+  Blab.remove({})
+  .then(function() {
+    process.stdout.write("Creating blabs: ");
+    return Blab.create(definedBlabs(users));
+  })
 
-.then(function() {
-  process.stdout.write("Creating blabs: ");
-  return Blab.create(definedBlabs(users));
-})
+  .then(function(blabs) {
+    console.log("Database seeded with " + blabs.length  + " blabs.");
+  })
 
-.then(function(blabs) {
-  console.log("Database seeded with " + blabs.length  + " blabs.");
-})
+  // Catch and log any errors along the chain.
+  .catch(function(err) {
+    console.log("Error:", err);
+  })
 
-// Catch and log any errors along the chain.
-.catch(function(err) {
-  console.log("Error:", err);
-})
+  // Finish the chain.
+  .then(
+    closeMongoConnection, // when the chain is successful…
+    closeMongoConnection  // when the chain has failed…
+  )
+});
 
-// Finish the chain.
-.then(
-  closeMongoConnection, // when the chain is successful…
-  closeMongoConnection  // when the chain has failed…
-);
 
 
 function closeMongoConnection() {
